@@ -3,18 +3,17 @@
     Copyright (C) 2022  BILAL EMOHMADIAN
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of the
-    License, or (at your option) any later version.
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+    GNU General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
+    You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 
 """
 
@@ -23,12 +22,24 @@ from tkinter import *
 AXE_X = 1
 AXE_Y = 0
 
+def binary(n):
+    list = []
+    while(n > 0):
+        bit = n %2
+        n = n // 2
+        list.append(bit)
+    return list[::-1]
+
 class DMatrix:
     def __init__(self, x, y):
         self.mat = [[0 for x in range(x)] for y in range(y)]
 
     def get(self):
         return self.mat
+
+    def errata(self):
+
+        return
 
     def print(self):
         print("+---+---+---+---+---+---+---+---+")
@@ -37,14 +48,21 @@ class DMatrix:
                 print('|', self.mat[y][x], end=" ")
             print("|\n+---+---+---+---+---+---+---+---+")
 
+    def placeCodeWords(self, x, y, bytes):
+        data = binary(bytes)
+        print(data)
+        self.mat[y][x] = data[7]
+        self.mat[y-1][x] = data[6]
+        self.mat[y-2][x-2] = data[0]
+
+        return
+
 
     def setWord(self, n, bytes):
         global AXE_X, AXE_Y
-
-
         index = [4, 0]
-
         AXE_Y, AXE_X = 0 , 1
+
 
         while((n-1) >= 0):
             if (index[AXE_Y] == 0):
@@ -62,10 +80,11 @@ class DMatrix:
                 n -=1
 
         print(index, AXE_X, AXE_Y)
-        self.mat[index[AXE_Y]][index[AXE_X]] = 1
+        self.placeCodeWords(index[AXE_X], index[AXE_Y], 130 + bytes)
+
 
 mat = DMatrix(8,8)
-for i in range (0,8):
+for i in range (0,3):
     mat.setWord(i, 1)
 mat.print()
 
