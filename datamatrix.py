@@ -1,28 +1,32 @@
 """
     matrix.py
     Copyright (C) 2022  BILAL EMOHMADIAN
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """
 
 from tkinter import *
+from typing import (
+    List
+)
 
 AXE_X = 1
 AXE_Y = 0
 
-def binary(n):
+def define_codwords(n:int) -> List[int]:
+    """
+    Give n: int
+    ____
+    Return a list of bits.
+    """
     list = []
     while(n > 0):
         bit = n %2
@@ -37,9 +41,13 @@ class DMatrix:
     def get(self):
         return self.mat
 
-    def errata(self):
+    def reed_solomon(bytes: List[int]) -> List[int]:
+        try:
+            list = []
 
-        return
+            return list
+        except Exception as e:
+            return []
 
     def print(self):
         print("+---+---+---+---+---+---+---+---+")
@@ -48,21 +56,44 @@ class DMatrix:
                 print('|', self.mat[y][x], end=" ")
             print("|\n+---+---+---+---+---+---+---+---+")
 
-    def placeCodeWords(self, x, y, bytes):
-        data = binary(bytes)
-        print(data)
-        self.mat[y][x] = data[7]
-        self.mat[y-1][x] = data[6]
-        self.mat[y-2][x-2] = data[0]
+    def placeCodeWords(self, y:int, x:int, data:List[int]) -> None:
+        """ 
+        y: index of the first table
+        x: index of the second table
+        data: list of bits
+        """
+
+        global AXE_X, AXE_Y
+
+        if(AXE_X == 0 and AXE_Y == 1):
+            x ,y  = y, x
+
+        #find  a better way to upgrade this
+
+        self.mat[y][x] = data[7]      #   8th bit
+        self.mat[y-1][x] = data[6]    #   7th bit
+        self.mat[y-2][x] = data[5]    #   6th bit
+
+        self.mat[y][x-1] = data[4]      #   5th bit
+        self.mat[y-1][x-1] = data[3]    #   4th bit
+        self.mat[y-2][x-1] = data[2]    #   3rd bit
+
+        self.mat[y-1][x-2] = data[1]    #   2nd bit
+        self.mat[y-2][x-2] = data[0]    #   1st bit
 
         return
 
 
-    def setWord(self, n, bytes):
+    def setWord(self, n:int, bytes:int) -> None:
+        """
+        n: is the n-th codewords
+        bytes: data storage
+        __________
+        Return None.
+        """
         global AXE_X, AXE_Y
         index = [4, 0]
         AXE_Y, AXE_X = 0 , 1
-
 
         while((n-1) >= 0):
             if (index[AXE_Y] == 0):
@@ -79,13 +110,14 @@ class DMatrix:
                 index[AXE_Y] -= 2
                 n -=1
 
-        print(index, AXE_X, AXE_Y)
-        self.placeCodeWords(index[AXE_X], index[AXE_Y], 130 + bytes)
+        self.placeCodeWords(index[AXE_X], index[AXE_Y], bytes) # Inversed X <-> Y to give data in a codewords
 
 
 mat = DMatrix(8,8)
+bytes = [98, 76, 54]
+rs = []
 for i in range (0,3):
-    mat.setWord(i, 1)
+    mat.setWord(i, define_codwords(130+ bytes[i]))
 mat.print()
 
 master = Tk()
@@ -113,5 +145,5 @@ for y in range(1, 9):
             w.create_rectangle(50*y, 50*x, 50*(y+1), 50*(x+1), fill="black", outline = 'white')
         else:
             w.create_rectangle(50*y, 50*x, 50*(y+1), 50*(x+1), fill="white", outline = 'black')
-w.pack()
+w.grid(row=0, column=0)
 master.mainloop()
